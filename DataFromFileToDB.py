@@ -12,28 +12,15 @@
 # Add functionality: 
 # Q: Do we want to Write a query for deleting table or records in a table?
 
-# TODO: Refactor to using Functions
-
 import sqlite3 as sqlite
-# import sqlite3
 import csv
 import os
 import sys
 
-# Vi vil a flere mindre funksjoner
-# Men vi vil ikke
+dbConnection = sqlite.connect('musicScales.db')
+data = []
 
-# Pushing project to Github
-# How?
-# "NarrowPath":
-#   Identifying exactly the information we need to be confident about the process.
-#       The process could include experimentation, e.g:
-#           Not exactly sure how, but can proably get there through trial and error.
-#           It is either A or B --> Trial and Error
-#   Then executing the process / doing it.
-
-def doAllDbStuff():
-    data = []
+def readDataFromFile():
     # with open('D:/Software-Development/DataFiles/alexandra-music-scales/data/music_scales.csv', newline='') as csvfile:
     with open(os.path.join(sys.path[0], "music_scales.csv"), "r", newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',')
@@ -41,10 +28,14 @@ def doAllDbStuff():
             data.append(tuple(row))
             # print(', '.join(row))
         data.pop(0)
-    
-    dbConnection = sqlite.connect('musicScales.db')
-    # dbConnection = sqlite3.connect('musicScales.db')
 
+def addDataToTable():
+    sql = 'INSERT INTO MUSICSCALES (scale_name, root, column_c, column_d, column_e, column_f) values(?, ?, ?, ?, ?, ?)'
+
+    with dbConnection:
+        dbConnection.executemany(sql, data)
+
+def createTable():
     with dbConnection:
         dbConnection.execute("""
             CREATE TABLE MUSICSCALES(
@@ -57,10 +48,10 @@ def doAllDbStuff():
                 column_f    INTEGER
             );
         """)
-    
-    sql = 'INSERT INTO MUSICSCALES (scale_name, root, column_c, column_d, column_e, column_f) values(?, ?, ?, ?, ?, ?)'
 
-    with dbConnection:
-        dbConnection.executemany(sql, data)
+def doAllDbStuff():
+    readDataFromFile()
+    createTable()
+    addDataToTable()
 
 doAllDbStuff()
